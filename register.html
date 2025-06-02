@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Register - Dream Lottery</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+</head>
+<body class="bg-black text-white flex items-center justify-center h-screen">
+  <div class="bg-gray-900 p-8 rounded-lg shadow-lg w-full max-w-sm">
+    <h2 class="text-2xl font-bold text-yellow-400 mb-4 text-center">📝 Register</h2>
+    <input id="email" type="email" placeholder="Email" class="w-full p-2 mb-4 rounded" />
+    <input id="password" type="password" placeholder="Password" class="w-full p-2 mb-4 rounded" />
+    <button onclick="register()" class="bg-yellow-400 text-black px-4 py-2 rounded w-full hover:bg-yellow-300">Register</button>
+    <p class="mt-4 text-center text-sm">पहले से अकाउंट है? <a href="login.html" class="text-yellow-400 underline">Login करें</a></p>
+  </div>
+  <script src="firebase-config.js"></script>
+  <script src="js/auth.js"></script>
+</body>
+</html>

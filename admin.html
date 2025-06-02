@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Panel - Dream Lottery</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+</head>
+<body class="bg-black text-white p-6">
+  <div class="max-w-2xl mx-auto">
+    <h1 class="text-3xl font-bold text-yellow-400 mb-4">🛠️ Dream Lottery Admin Panel</h1>
+    <p id="admin-email" class="text-sm text-gray-400 mb-6">Admin: ...</p>
+
+    <!-- Result Form -->
+    <div class="bg-gray-800 p-4 rounded mb-6">
+      <h2 class="text-xl mb-2">🔢 आज का Result डालें</h2>
+      <input id="result-number" type="text" placeholder="Result नंबर डालें (जैसे 98765)" class="w-full p-2 mb-4 rounded text-black" />
+      <button onclick="submitResult()" class="bg-green-500 px-4 py-2 rounded hover:bg-green-400 text-black">Save Result</button>
+    </div>
+
+    <!-- Show Result -->
+    <div>
+      <h2 class="text-xl mb-2">📅 Latest Results</h2>
+      <ul id="results-list" class="list-disc pl-6 text-sm text-gray-300"></ul>
+    </div>
+
+    <button onclick="logout()" class="mt-8 bg-red-500 px-4 py-2 rounded">Logout</button>
+  </div>
+
+  <script src="firebase-config.js"></script>
+  <script>
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    auth.onAuthStateChanged(user => {
+      if (user && user.email === "admin@dream.com") {
+        document.getElementById("admin-email").textContent = "Admin: " + user.email;
+        loadResults();
+      } else {
+        alert("Access Denied. Admin Only.");
+        window.location.href = "login.html";
+      }
+    });
+
+    function submitResult() {
+      const number = document.getElementById("result-number").value;
+      if (!number) {
+        alert("कृपया Result नंबर डालें");
+        return;
+      }
+
+      db.collection("results").add({
+        number: number,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      }).then(() => {
+        alert("Result Saved!");
+        document.getElementById("result-number").value = "";
+        loadResults();
+      });
+    }
+
+    function loadResults() {
+      db.collection("results").orderBy("timestamp", "desc").limit(10).get().then(snapshot => {
+        const list = document.getElementById("results-list");
+        list.innerHTML = "";
+        snapshot.forEach(doc => {
+          const li = document.createElement("li");
+          li.textContent = `${doc.data().number} (🕒 ${new Date(doc.data().timestamp.toDate()).toLocaleString()})`;
+          list.appendChild(li);
+        });
+      });
+    }
+
+    function logout() {
+      auth.signOut().then(() => {
+        window.location.href = "login.html";
+      });
+    }
+  </script>
+</body>
+</html>

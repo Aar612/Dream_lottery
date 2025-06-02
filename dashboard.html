@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard - Dream Lottery</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+</head>
+<body class="bg-black text-white p-6">
+  <div class="max-w-2xl mx-auto">
+    <h1 class="text-3xl font-bold text-yellow-400 mb-4">🎯 Dream Lottery Dashboard</h1>
+    <p id="user-email" class="text-sm text-gray-400 mb-6">Welcome, ...</p>
+
+    <!-- Prediction Form -->
+    <div class="bg-gray-800 p-4 rounded mb-6">
+      <h2 class="text-xl mb-2">अपना Prediction डालें</h2>
+      <input id="prediction" type="text" placeholder="कोई भी नंबर (जैसे 12345)" class="w-full p-2 mb-4 rounded text-black" />
+      <button onclick="submitPrediction()" class="bg-yellow-400 text-black px-4 py-2 rounded hover:bg-yellow-300">Submit</button>
+    </div>
+
+    <!-- Prediction History -->
+    <div>
+      <h2 class="text-xl mb-2">🕒 आपके Prediction</h2>
+      <ul id="history" class="list-disc pl-6 text-sm text-gray-300"></ul>
+    </div>
+
+    <!-- Logout -->
+    <button onclick="logout()" class="mt-8 bg-red-500 px-4 py-2 rounded">Logout</button>
+  </div>
+
+  <script src="firebase-config.js"></script>
+  <script>
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        document.getElementById('user-email').textContent = "Welcome, " + user.email;
+
+        // Load previous predictions
+        db.collection("predictions")
+          .where("userId", "==", user.uid)
+          .orderBy("timestamp", "desc")
+          .get()
+          .then(snapshot => {
+            const list = document.getElementById("history");
+            snapshot.forEach(doc => {
+              const li = document.createElement("li");
+              li.textContent = `${doc.data().number} (🕒 ${new Date(doc.data().timestamp.toDate()).toLocaleString()})`;
+              list.appendChild(li);
+            });
+          });
+      } else {
+        window.location.href = "login.html";
+      }
+    });
+
+    function submitPrediction() {
+      const number = document.getElementById("prediction").value;
+      const user = auth.currentUser;
+
+      if (number.trim() === "") {
+        alert("कृपया कोई नंबर डालें");
+        return;
+      }
+
+      db.collection("predictions").add({
+        userId: user.uid,
+        email: user.email,
+        number: number,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      }).then(() => {
+        alert("Prediction Saved!");
+        location.reload();
+      }).catch(err => {
+        alert("Error: " + err.message);
+      });
+    }
+
+    function logout() {
+      auth.signOut().then(() => {
+        window.location.href = "login.html";
+      });
+    }
+  </script>
+</body>
+</html>

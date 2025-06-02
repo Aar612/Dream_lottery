@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lottery Results - Dream Lottery</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+</head>
+<body class="bg-black text-white p-6">
+  <div class="max-w-xl mx-auto">
+    <h1 class="text-3xl font-bold text-yellow-400 mb-6">🎉 Dream Lottery Results</h1>
+
+    <div class="bg-gray-800 p-4 rounded mb-4">
+      <h2 class="text-xl mb-2">🟡 ताज़ा Results</h2>
+      <ul id="results-list" class="list-disc pl-6 text-sm text-gray-300"></ul>
+    </div>
+
+    <a href="dashboard.html" class="text-blue-400 underline">🔙 Back to Dashboard</a>
+  </div>
+
+  <script src="firebase-config.js"></script>
+  <script>
+    const db = firebase.firestore();
+
+    db.collection("results").orderBy("timestamp", "desc").limit(10).get().then(snapshot => {
+      const list = document.getElementById("results-list");
+      snapshot.forEach(doc => {
+        const li = document.createElement("li");
+        li.textContent = `${doc.data().number} (🕒 ${new Date(doc.data().timestamp.toDate()).toLocaleString()})`;
+        list.appendChild(li);
+      });
+    });
+  </script>
+</body>
+</html>
